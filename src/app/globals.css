@@ -26,3 +26,12 @@ body {
     color: var(--foreground);
     font-family: "Plus Jakarta Sans", sans-serif;
 }
+
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}

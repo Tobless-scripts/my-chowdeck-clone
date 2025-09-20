@@ -4,23 +4,71 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Use viewport units for coordinates
-const BASE_Y = 570; // 90vh, about 10vh above bottom for lower roads
+// Responsive hook for device type
+function useDeviceType() {
+    const [device, setDevice] = useState(() => {
+        if (typeof window === "undefined") return "desktop";
+        if (window.innerWidth <= 750) return "mobile";
+        if (window.innerWidth <= 1024) return "tablet";
+        return "desktop";
+    });
+    useEffect(() => {
+        function handleResize() {
+            if (window.innerWidth <= 768) setDevice("mobile");
+            else if (window.innerWidth <= 1024) setDevice("tablet");
+            else setDevice("desktop");
+        }
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+    return device;
+}
 
-const paths = [
-    // Rider 1: left-to-right, increased width
-    `M 0 ${BASE_Y} Q 700 ${BASE_Y - 20} 1400 ${BASE_Y}`,
-    // Rider 2: right-to-left, increased width
-    `M 1400 ${BASE_Y} Q 700 ${BASE_Y - 10} 0 ${BASE_Y}`,
-    // Rider 3: right diagonal, increased width
-    `M 1360 ${BASE_Y + 10} Q 1100 ${BASE_Y - 10} 50 ${BASE_Y - 10}`,
-];
+// Paths: desktop vs tablet vs mobile
+function getPaths(device) {
+    const WIDTH = window.innerWidth;
+    const PADDING = WIDTH * 0.025;
 
-const riders = [
-    { src: "/rider1.svg", path: paths[0], duration: 9.5 },
-    { src: "/rider2.svg", path: paths[1], duration: 9.5 },
-    { src: "/rider3.webp", path: paths[2], duration: 9.5 },
-];
+    if (device === "mobile") {
+        const BASE_Y = window.innerHeight - 60;
+        return [
+            // Rider 1: left-to-right
+            `M ${PADDING} ${BASE_Y} Q ${WIDTH / 2} ${BASE_Y - 30} ${
+                WIDTH - PADDING
+            } ${BASE_Y}`,
+            // Rider 2: right-to-left
+            `M ${WIDTH - PADDING} ${BASE_Y} Q ${WIDTH / 2} ${
+                BASE_Y - 30
+            } ${PADDING} ${BASE_Y}`,
+            // Rider 3: diagonal
+            `M ${WIDTH - 2 * PADDING} ${BASE_Y} Q ${WIDTH * 0.75} ${
+                BASE_Y - 60
+            } ${PADDING * 2} ${BASE_Y}`,
+        ];
+    } else if (device === "tablet") {
+        const BASE_Y = Math.round(window.innerHeight * 0.65) - 48;
+        return [
+            `M ${PADDING} ${BASE_Y} Q ${WIDTH / 2} ${BASE_Y - 70} ${
+                WIDTH - PADDING
+            } ${BASE_Y}`,
+            `M ${WIDTH - PADDING} ${BASE_Y} Q ${WIDTH / 2} ${
+                BASE_Y - 50
+            } ${PADDING} ${BASE_Y}`,
+            `M ${WIDTH - 2 * PADDING} ${BASE_Y} Q ${WIDTH * 0.75} ${
+                BASE_Y - 80
+            } ${PADDING * 2} ${BASE_Y}`,
+        ];
+    } else {
+        const BASE_Y = window.innerHeight - 60;
+        return [
+            `M 0 ${BASE_Y} Q ${WIDTH / 2} ${BASE_Y - 70} ${WIDTH} ${BASE_Y}`,
+            `M ${WIDTH} ${BASE_Y} Q ${WIDTH / 2} ${BASE_Y - 40} 0 ${BASE_Y}`,
+            `M ${WIDTH - 40} ${BASE_Y + 10} Q ${WIDTH * 0.75} ${
+                BASE_Y - 40
+            } 40 ${BASE_Y - 10}`,
+        ];
+    }
+}
 
 function getSVGPath(pathD) {
     const svgNS = "http://www.w3.org/2000/svg";
@@ -38,7 +86,6 @@ function Rider({ src, path, duration, progress, size = 64 }) {
     if (typeof window !== "undefined" && progress < 1) {
         const pathElem = getSVGPath(path);
         const length = pathElem.getTotalLength();
-        // Use easing for smoother animation progress
         const easedProgress = easeInOutQuad(progress);
         const point = pathElem.getPointAtLength(easedProgress * length);
         riderStyle = {
@@ -53,7 +100,6 @@ function Rider({ src, path, duration, progress, size = 64 }) {
             display: "block",
         };
     }
-
     return (
         <Image
             src={src}
@@ -75,9 +121,29 @@ export default function Hero() {
         "Kun ci abinci?",
     ];
 
-    const [index, setIndex] = useState(0);
+    const device = useDeviceType();
 
-    // Sequential rider animation state
+    // Dynamic paths based on screen size and device type
+    const [paths, setPaths] = useState(() =>
+        typeof window !== "undefined" ? getPaths(device) : []
+    );
+
+    useEffect(() => {
+        function updatePaths() {
+            setPaths(getPaths(device));
+        }
+        updatePaths();
+        window.addEventListener("resize", updatePaths);
+        return () => window.removeEventListener("resize", updatePaths);
+    }, [device]);
+
+    const riders = [
+        { src: "/rider1.svg", path: paths[0], duration: 8 },
+        { src: "/rider2.svg", path: paths[1], duration: 8 },
+        { src: "/rider3.webp", path: paths[2], duration: 8 },
+    ];
+
+    const [index, setIndex] = useState(0);
     const [activeRider, setActiveRider] = useState(0);
     const [progress, setProgress] = useState(0);
 
@@ -89,8 +155,11 @@ export default function Hero() {
     }, [texts.length]);
 
     useEffect(() => {
+        setProgress(0); // Instantly reset progress so animation starts immediately
+
         let start = null;
         let animationFrame;
+
         function animate(ts) {
             if (!start) start = ts;
             const elapsed = ts - start;
@@ -108,14 +177,16 @@ export default function Hero() {
                 }, 500);
             }
         }
+
         animationFrame = requestAnimationFrame(animate);
+
         return () => {
             cancelAnimationFrame(animationFrame);
         };
-    }, [activeRider]);
+    }, [activeRider, paths]);
 
     return (
-        <section className="relative w-full h-screen overflow-hidden">
+        <section className="relative w-full h-screen md:h-[65vh] lg:h-screen overflow-hidden">
             {/* Background image */}
             <div className="absolute inset-0 -z-10">
                 <Image
@@ -142,7 +213,7 @@ export default function Hero() {
                     </motion.h1>
                 </AnimatePresence>
 
-                <div className="flex items-center justify-center mx-auto gap-6 mt-6">
+                <div className="flex flex-col md:flex-row items-center justify-center mx-auto gap-6 mt-6">
                     <button className="flex items-center gap-2 bg-[#155B4A] hover:bg-[#195143] text-white px-4 py-3.5 cursor-pointer rounded-md">
                         <Image
                             src="/PlayStore.svg"
@@ -206,6 +277,13 @@ export default function Hero() {
                         path={r.path}
                         duration={r.duration}
                         progress={progress}
+                        size={
+                            device === "mobile"
+                                ? 40
+                                : device === "tablet"
+                                ? 56
+                                : 64
+                        }
                     />
                 ) : null
             )}
