@@ -1,11 +1,32 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const ScrollPhoneAnimation = () => {
     const containerRef = useRef(null);
+    const [screenSize, setScreenSize] = useState("lg");
+    const [animatedItems, setAnimatedItems] = useState(new Set());
+
+    // Track screen size
+    useEffect(() => {
+        const checkScreenSize = () => {
+            if (window.innerWidth >= 1024) {
+                setScreenSize("lg");
+            } else if (window.innerWidth >= 768) {
+                setScreenSize("md");
+            } else {
+                setScreenSize("sm");
+            }
+        };
+
+        checkScreenSize();
+        window.addEventListener("resize", checkScreenSize);
+        return () => window.removeEventListener("resize", checkScreenSize);
+    }, []);
+
+    // Large screen scroll animations (original complex animation)
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end start"],
@@ -26,7 +47,6 @@ const ScrollPhoneAnimation = () => {
     const cardsOpacity = useTransform(scrollYProgress, [0.15, 0.25], [0, 1]);
 
     // Sequential card opening/closing with updated timing
-    // Card 1: Opens at 25%, closes at 45%
     const card1Width = useTransform(
         scrollYProgress,
         [0.25, 0.3, 0.4, 0.45],
@@ -42,14 +62,12 @@ const ScrollPhoneAnimation = () => {
         [0.25, 0.3, 0.4, 0.45],
         [1, 0, 0, 1]
     );
-    // Card 1 image growth
     const card1ImageScale = useTransform(
         scrollYProgress,
-        [0.27, 0.32, 0.38, 0.43], // match content open/close timing
-        [1, 1.2, 1.3, 1] // start normal → bigger → normal
+        [0.27, 0.32, 0.38, 0.43],
+        [1, 1.2, 1.3, 1]
     );
 
-    // Card 2: Opens at 49%, closes at 65%
     const card2Width = useTransform(
         scrollYProgress,
         [0.49, 0.54, 0.6, 0.65],
@@ -65,14 +83,12 @@ const ScrollPhoneAnimation = () => {
         [0.49, 0.54, 0.6, 0.65],
         [1, 0, 0, 1]
     );
-    // Card 2 image growth
     const card2ImageScale = useTransform(
         scrollYProgress,
-        [0.51, 0.56, 0.58, 0.63], // fixed timing to match card 2
-        [1, 1.2, 1.3, 1] // start normal → bigger → normal
+        [0.51, 0.56, 0.58, 0.63],
+        [1, 1.2, 1.3, 1]
     );
 
-    // Card 3: Opens at 69%, closes at 85%
     const card3Width = useTransform(
         scrollYProgress,
         [0.69, 0.74, 0.8, 0.85],
@@ -88,26 +104,22 @@ const ScrollPhoneAnimation = () => {
         [0.69, 0.74, 0.8, 0.85],
         [1, 0, 0, 1]
     );
-    // Card 3 image growth
     const card3ImageScale = useTransform(
         scrollYProgress,
-        [0.71, 0.76, 0.78, 0.83], // fixed timing to match card 3
-        [1, 1.2, 1.3, 1] // start normal → bigger → normal
+        [0.71, 0.76, 0.78, 0.83],
+        [1, 1.2, 1.3, 1]
     );
 
-    // Card 4: Opens at 89%, closes at 110% (stays open at the end)
     const card4Width = useTransform(
         scrollYProgress,
         [0.89, 0.94, 1.05, 1.1],
         [200, 700, 700, 200]
     );
-    // Card 4 image growth
     const card4ImageScale = useTransform(
         scrollYProgress,
-        [0.91, 0.96, 1.03, 1.08], // fixed timing to match card 4
-        [1, 1.2, 1.3, 1] // start normal → bigger → normal
+        [0.91, 0.96, 1.03, 1.08],
+        [1, 1.2, 1.3, 1]
     );
-
     const card4ContentOpacity = useTransform(
         scrollYProgress,
         [0.91, 0.96, 1.03, 1.08],
@@ -186,6 +198,523 @@ const ScrollPhoneAnimation = () => {
         },
     ];
 
+    // Mobile Card Component for smaller screens
+    const MobileCard = ({ card, index }) => {
+        const ref = useRef(null);
+        const cardId = `${card.id}-${index}`;
+        const hasAnimated = animatedItems.has(cardId);
+
+        const isInView = useInView(ref, {
+            once: true, // Only trigger once
+            amount: screenSize === "sm" ? 0.3 : 0.4,
+            margin: "-50px 0px -50px 0px",
+        });
+
+        // Track when animation has been triggered
+        useEffect(() => {
+            if (isInView && !hasAnimated && screenSize !== "lg") {
+                setAnimatedItems((prev) => new Set([...prev, cardId]));
+            }
+        }, [isInView, hasAnimated, cardId, screenSize]);
+
+        const shouldAnimate = hasAnimated || isInView;
+
+        return (
+            <motion.div
+                ref={ref}
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={
+                    shouldAnimate
+                        ? {
+                              opacity: 1,
+                              y: 0,
+                              scale: 1,
+                          }
+                        : {
+                              opacity: 0,
+                              y: 50,
+                              scale: 0.9,
+                          }
+                }
+                transition={{
+                    duration: 0.6,
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                }}
+                className={`
+                    ${screenSize === "sm" ? "mx-4 mb-8" : "mx-6 mb-12"}
+                    rounded-3xl overflow-hidden shadow-2xl border-4 border-black
+                    ${screenSize === "sm" ? "h-[500px]" : "h-[600px]"}
+                `}
+                style={{ backgroundColor: card.closedColor }}
+            >
+                <div className="h-full flex flex-col">
+                    {/* Header section */}
+                    <div
+                        className={`${
+                            screenSize === "sm" ? "p-6 h-[40%]" : "p-8 h-[35%]"
+                        } flex flex-col justify-center`}
+                    >
+                        <motion.h2
+                            className={`font-bold mb-4 leading-tight ${
+                                screenSize === "sm" ? "text-3xl" : "text-4xl"
+                            }`}
+                            style={{ color: card.closedColorText }}
+                            initial={{ scale: 1, rotate: 0 }}
+                            animate={
+                                shouldAnimate
+                                    ? {
+                                          scale: 1.05,
+                                          rotate: 1,
+                                      }
+                                    : { scale: 1, rotate: 0 }
+                            }
+                            transition={{
+                                duration: 0.8,
+                                ease: "easeOut",
+                                delay: 0.2,
+                            }}
+                        >
+                            {card.openContent.title}
+                        </motion.h2>
+                        <motion.p
+                            className={`text-gray-700 leading-relaxed ${
+                                screenSize === "sm" ? "text-sm" : "text-base"
+                            }`}
+                            initial={{ opacity: 0 }}
+                            animate={
+                                shouldAnimate ? { opacity: 1 } : { opacity: 0 }
+                            }
+                            transition={{ delay: 0.3, duration: 0.5 }}
+                        >
+                            {card.openContent.description}
+                        </motion.p>
+                    </div>
+
+                    {/* Image section */}
+                    <div
+                        className={`${
+                            screenSize === "sm" ? "h-[60%]" : "h-[65%]"
+                        } relative overflow-hidden`}
+                    >
+                        <motion.div
+                            className="w-full h-full relative"
+                            initial={{ scale: 1, rotate: 0 }}
+                            animate={
+                                shouldAnimate
+                                    ? {
+                                          scale: 1.1,
+                                          rotate: 2,
+                                      }
+                                    : { scale: 1, rotate: 0 }
+                            }
+                            transition={{
+                                duration: 0.8,
+                                ease: "easeOut",
+                                delay: 0.4,
+                            }}
+                        >
+                            <Image
+                                src={card.openContent.img}
+                                alt={card.openContent.title}
+                                fill
+                                className="object-contain p-4"
+                            />
+                        </motion.div>
+
+                        {/* Floating elements for visual interest */}
+                        <motion.div
+                            className="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full"
+                            initial={{ y: 0, opacity: 0.5 }}
+                            animate={
+                                shouldAnimate
+                                    ? {
+                                          y: -20,
+                                          opacity: 1,
+                                      }
+                                    : { y: 0, opacity: 0.5 }
+                            }
+                            transition={{
+                                duration: 0.6,
+                                ease: "easeOut",
+                                delay: 0.5,
+                            }}
+                        />
+                        <motion.div
+                            className="absolute bottom-8 left-6 w-6 h-6 bg-white/30 rounded-full"
+                            initial={{ y: 0, x: 0, opacity: 0.3 }}
+                            animate={
+                                shouldAnimate
+                                    ? {
+                                          y: 15,
+                                          x: 10,
+                                          opacity: 0.8,
+                                      }
+                                    : { y: 0, x: 0, opacity: 0.3 }
+                            }
+                            transition={{
+                                duration: 0.6,
+                                ease: "easeOut",
+                                delay: 0.7,
+                            }}
+                        />
+                    </div>
+                </div>
+            </motion.div>
+        );
+    };
+
+    // Tablet Card Component
+    const TabletCard = ({ card, index }) => {
+        const ref = useRef(null);
+        const cardId = `tablet-${card.id}-${index}`;
+        const hasAnimated = animatedItems.has(cardId);
+
+        const isInView = useInView(ref, {
+            once: true, // Only trigger once
+            amount: 0.4,
+            margin: "-100px 0px -100px 0px",
+        });
+
+        // Track when animation has been triggered
+        useEffect(() => {
+            if (isInView && !hasAnimated && screenSize === "md") {
+                setAnimatedItems((prev) => new Set([...prev, cardId]));
+            }
+        }, [isInView, hasAnimated, cardId, screenSize]);
+
+        const shouldAnimate = hasAnimated || isInView;
+
+        return (
+            <motion.div
+                ref={ref}
+                initial={{
+                    opacity: 0,
+                    x: index % 2 === 0 ? -100 : 100,
+                    rotateY: 15,
+                }}
+                animate={
+                    shouldAnimate
+                        ? {
+                              opacity: 1,
+                              x: 0,
+                              rotateY: 0,
+                              scale: 1,
+                          }
+                        : {
+                              opacity: 0,
+                              x: index % 2 === 0 ? -100 : 100,
+                              rotateY: 15,
+                              scale: 0.9,
+                          }
+                }
+                transition={{
+                    duration: 0.8,
+                    delay: index * 0.2,
+                    type: "spring",
+                    stiffness: 80,
+                }}
+                className="mx-8 mb-16 rounded-3xl overflow-hidden shadow-2xl border-4 border-black"
+                style={{ backgroundColor: card.closedColor }}
+            >
+                <div className="grid grid-cols-2 h-[400px]">
+                    {/* Content side */}
+                    <div className="p-8 flex flex-col justify-center">
+                        <motion.h2
+                            className="text-4xl font-bold mb-6 leading-tight"
+                            style={{ color: card.closedColorText }}
+                            initial={{ scale: 1, rotateX: 0 }}
+                            animate={
+                                shouldAnimate
+                                    ? {
+                                          scale: 1.1,
+                                          rotateX: 5,
+                                      }
+                                    : { scale: 1, rotateX: 0 }
+                            }
+                            transition={{
+                                duration: 0.8,
+                                ease: "easeOut",
+                                delay: 0.3,
+                            }}
+                        >
+                            {card.openContent.title}
+                        </motion.h2>
+                        <motion.p
+                            className="text-gray-700 leading-relaxed text-lg"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={
+                                shouldAnimate
+                                    ? { opacity: 1, y: 0 }
+                                    : { opacity: 0, y: 20 }
+                            }
+                            transition={{ delay: 0.4, duration: 0.6 }}
+                        >
+                            {card.openContent.description}
+                        </motion.p>
+                    </div>
+
+                    {/* Image side */}
+                    <div className="relative overflow-hidden">
+                        <motion.div
+                            className="w-full h-full relative"
+                            initial={{ scale: 1, rotateZ: 0 }}
+                            animate={
+                                shouldAnimate
+                                    ? {
+                                          scale: 1.15,
+                                          rotateZ: 3,
+                                      }
+                                    : { scale: 1, rotateZ: 0 }
+                            }
+                            transition={{
+                                duration: 0.8,
+                                ease: "easeOut",
+                                delay: 0.5,
+                            }}
+                        >
+                            <Image
+                                src={card.openContent.img}
+                                alt={card.openContent.title}
+                                fill
+                                className="object-contain p-6"
+                            />
+                        </motion.div>
+
+                        {/* Background pattern */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/20 pointer-events-none" />
+                    </div>
+                </div>
+            </motion.div>
+        );
+    };
+
+    // Phone component for smaller screens
+    const ResponsivePhone = () => {
+        const ref = useRef(null);
+        const phoneId = "responsive-phone";
+        const hasAnimated = animatedItems.has(phoneId);
+
+        const isInView = useInView(ref, {
+            once: true, // Only trigger once
+            amount: 0.3,
+        });
+
+        // Track when animation has been triggered
+        useEffect(() => {
+            if (isInView && !hasAnimated && screenSize !== "lg") {
+                setAnimatedItems((prev) => new Set([...prev, phoneId]));
+            }
+        }, [isInView, hasAnimated, screenSize]);
+
+        const shouldAnimate = hasAnimated || isInView;
+
+        return (
+            <motion.div
+                ref={ref}
+                initial={{ opacity: 0, scale: 0.8, y: 100 }}
+                animate={
+                    shouldAnimate
+                        ? {
+                              opacity: 1,
+                              scale: 1,
+                              y: 0,
+                          }
+                        : {
+                              opacity: 0,
+                              scale: 0.8,
+                              y: 100,
+                          }
+                }
+                transition={{
+                    duration: 0.8,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15,
+                }}
+                className="flex justify-center items-center py-12"
+            >
+                <div
+                    className={`relative ${
+                        screenSize === "sm"
+                            ? "w-[280px] h-[500px]"
+                            : "w-[350px] h-[600px]"
+                    }`}
+                >
+                    {/* Phone with single floating animation */}
+                    <motion.div
+                        className="relative w-full h-full"
+                        initial={{ y: 0, rotateY: 0, rotateX: 0 }}
+                        animate={
+                            shouldAnimate
+                                ? {
+                                      y: -20,
+                                      rotateY: 5,
+                                      rotateX: 2,
+                                  }
+                                : { y: 0, rotateY: 0, rotateX: 0 }
+                        }
+                        transition={{
+                            duration: 1.2,
+                            ease: "easeOut",
+                            delay: 0.2,
+                        }}
+                    >
+                        <Image
+                            src="/chowdeck-app.png"
+                            alt="ChowDeck App"
+                            fill
+                            priority
+                            className="object-contain drop-shadow-2xl"
+                        />
+                    </motion.div>
+
+                    {/* Floating overlay with single animation */}
+                    <motion.div
+                        className={`absolute ${
+                            screenSize === "sm"
+                                ? "top-4 right-2 w-[80px] h-[80px]"
+                                : "top-6 right-4 w-[100px] h-[100px]"
+                        }`}
+                        initial={{ y: 0, x: 0, rotate: 0, scale: 1 }}
+                        animate={
+                            shouldAnimate
+                                ? {
+                                      y: -30,
+                                      x: 15,
+                                      rotate: 10,
+                                      scale: 1.2,
+                                  }
+                                : { y: 0, x: 0, rotate: 0, scale: 1 }
+                        }
+                        transition={{
+                            duration: 1,
+                            ease: "easeOut",
+                            delay: 0.5,
+                        }}
+                    >
+                        <Image
+                            src="/pastry.svg"
+                            alt="Floating Pastry"
+                            fill
+                            className="drop-shadow-xl"
+                        />
+                    </motion.div>
+
+                    {/* Additional floating elements */}
+                    <motion.div
+                        className="absolute top-1/3 left-0 w-4 h-4 bg-orange-400 rounded-full opacity-70"
+                        initial={{ y: 0, opacity: 0.4, scale: 1 }}
+                        animate={
+                            shouldAnimate
+                                ? {
+                                      y: -40,
+                                      opacity: 1,
+                                      scale: 1.5,
+                                  }
+                                : { y: 0, opacity: 0.4, scale: 1 }
+                        }
+                        transition={{
+                            duration: 0.8,
+                            ease: "easeOut",
+                            delay: 1,
+                        }}
+                    />
+                    <motion.div
+                        className="absolute bottom-1/3 right-0 w-6 h-6 bg-green-400 rounded-full opacity-60"
+                        initial={{ y: 0, x: 0, opacity: 0.3 }}
+                        animate={
+                            shouldAnimate
+                                ? {
+                                      y: 35,
+                                      x: -20,
+                                      opacity: 0.8,
+                                  }
+                                : { y: 0, x: 0, opacity: 0.3 }
+                        }
+                        transition={{
+                            duration: 0.8,
+                            ease: "easeOut",
+                            delay: 1.5,
+                        }}
+                    />
+                </div>
+            </motion.div>
+        );
+    };
+
+    if (screenSize !== "lg") {
+        // Mobile and Tablet Layout
+        return (
+            <div className="relative">
+                {/* Diagonal Wavy Divider */}
+                <div className="absolute top-[-45] right-0 w-full overflow-hidden leading-none z-40 bg-white">
+                    <svg
+                        className="relative block w-full h-[80px] rotate-180"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 1200 80"
+                        preserveAspectRatio="none"
+                    >
+                        <path
+                            d="M1200,40 C1180,50 1160,50 1140,38 C1120,50 1100,50 1080,36 C1060,50 1040,50 1020,34 C1000,50 980,50 960,32 C940,50 920,50 900,30 C880,50 860,50 840,28 C820,50 800,50 780,26 C760,50 740,50 720,24 C700,50 680,50 660,22 C640,50 620,50 600,20 C580,50 560,50 540,18 C520,50 500,50 480,16 C460,50 440,50 420,14 C400,50 380,50 360,12 C340,50 320,50 300,10 C280,50 260,50 240,8 C220,50 200,50 180,6 C160,50 140,50 120,4 C100,50 80,50 60,2 C40,50 20,50 0,0 L0,80 L1200,80 Z"
+                            fill="#6B837D"
+                        />
+                    </svg>
+                </div>
+
+                <div className="bg-white pt-18">
+                    {/* Header */}
+                    <motion.div
+                        className="flex flex-col gap-4 z-10 mb-12 px-4"
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                    >
+                        <h1
+                            className={`font-extrabold text-center text-black ${
+                                screenSize === "sm" ? "text-4xl" : "text-5xl"
+                            }`}
+                        >
+                            What's on Deck?
+                        </h1>
+                        <p
+                            className={`font-medium text-center text-black ${
+                                screenSize === "sm" ? "text-lg" : "text-xl"
+                            }`}
+                        >
+                            Try the everything app.
+                        </p>
+                    </motion.div>
+
+                    {/* Phone Section */}
+                    <ResponsivePhone />
+
+                    {/* Cards Section */}
+                    <div className={screenSize === "sm" ? "py-8" : "py-12"}>
+                        {cards.map((card, index) =>
+                            screenSize === "md" ? (
+                                <TabletCard
+                                    key={card.id}
+                                    card={card}
+                                    index={index}
+                                />
+                            ) : (
+                                <MobileCard
+                                    key={card.id}
+                                    card={card}
+                                    index={index}
+                                />
+                            )
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Desktop Layout (original complex animation)
     return (
         <div className="relative">
             {/* Diagonal Wavy Divider - Right to Left */}
@@ -197,28 +726,7 @@ const ScrollPhoneAnimation = () => {
                     preserveAspectRatio="none"
                 >
                     <path
-                        d="M1200,40
-         C1180,50 1160,50 1140,38
-         C1120,50 1100,50 1080,36
-         C1060,50 1040,50 1020,34
-         C1000,50 980,50 960,32
-         C940,50 920,50 900,30
-         C880,50 860,50 840,28
-         C820,50 800,50 780,26
-         C760,50 740,50 720,24
-         C700,50 680,50 660,22
-         C640,50 620,50 600,20
-         C580,50 560,50 540,18
-         C520,50 500,50 480,16
-         C460,50 440,50 420,14
-         C400,50 380,50 360,12
-         C340,50 320,50 300,10
-         C280,50 260,50 240,8
-         C220,50 200,50 180,6
-         C160,50 140,50 120,4
-         C100,50 80,50 60,2
-         C40,50 20,50 0,0
-         L0,80 L1200,80 Z"
+                        d="M1200,40 C1180,50 1160,50 1140,38 C1120,50 1100,50 1080,36 C1060,50 1040,50 1020,34 C1000,50 980,50 960,32 C940,50 920,50 900,30 C880,50 860,50 840,28 C820,50 800,50 780,26 C760,50 740,50 720,24 C700,50 680,50 660,22 C640,50 620,50 600,20 C580,50 560,50 540,18 C520,50 500,50 480,16 C460,50 440,50 420,14 C400,50 380,50 360,12 C340,50 320,50 300,10 C280,50 260,50 240,8 C220,50 200,50 180,6 C160,50 140,50 120,4 C100,50 80,50 60,2 C40,50 20,50 0,0 L0,80 L1200,80 Z"
                         fill="#6B837D"
                     />
                 </svg>
@@ -234,7 +742,7 @@ const ScrollPhoneAnimation = () => {
                     </p>
                 </div>
                 <div ref={containerRef} className="h-[5000vh] relative">
-                    <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden ">
+                    <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                         {/* Phone - starts centered, moves left */}
                         <motion.div
                             style={{
@@ -244,9 +752,7 @@ const ScrollPhoneAnimation = () => {
                             }}
                             className="absolute top-0 left-0 z-40 w-full h-screen flex justify-center items-start"
                         >
-                            {/* Phone container with extra space for overlay */}
                             <div className="relative w-[500px] h-[900px] pt-6 pr-16">
-                                {/* Base Phone Image */}
                                 <div className="relative w-[400px] h-[850px]">
                                     <Image
                                         src="/chowdeck-app.png"
@@ -257,8 +763,6 @@ const ScrollPhoneAnimation = () => {
                                         className="object-top"
                                     />
                                 </div>
-
-                                {/* Overlay Image - positioned absolutely within the larger container */}
                                 <div className="absolute top-0 right-7 z-50">
                                     <Image
                                         src="/pastry.svg"
@@ -287,7 +791,7 @@ const ScrollPhoneAnimation = () => {
                                         width: card.width,
                                         backgroundColor: card.closedColor,
                                     }}
-                                    className={`rounded-2xl relative overflow-hidden h-[99.5vh] flex items-center justify-center transition-all duration-700 ease-out`}
+                                    className="rounded-2xl relative overflow-hidden h-[99.5vh] flex items-center justify-center transition-all duration-700 ease-out"
                                 >
                                     {/* Closed state - vertical text */}
                                     <motion.div
@@ -313,12 +817,9 @@ const ScrollPhoneAnimation = () => {
                                             opacity: card.contentOpacity,
                                             backgroundColor: card.closedColor,
                                         }}
-                                        className="absolute inset-0 text-gray-800  border-4 border-black overflow-hidden z-20
-                                         rounded-2xl"
+                                        className="absolute inset-0 text-gray-800 border-4 border-black overflow-hidden z-20 rounded-2xl"
                                     >
-                                        {/* Vertical Stack Layout */}
                                         <div className="flex flex-col h-full pt-24">
-                                            {/* Top Section - Title and Description (35% height) */}
                                             <div className="flex-none h-[35%] flex flex-col justify-center p-8">
                                                 <h2 className="text-5xl font-bold text-gray-900 mb-8 leading-tight">
                                                     {card.openContent.title}
@@ -330,15 +831,13 @@ const ScrollPhoneAnimation = () => {
                                                     }
                                                 </p>
                                             </div>
-
-                                            {/* Bottom Section - Image (65% height) */}
                                             <div className="flex-none h-[65%] flex items-center justify-center relative">
                                                 <div className="w-full h-full relative">
                                                     <motion.div
                                                         style={{
                                                             scale: card.imageScale,
-                                                        }} // dynamic scale
-                                                        className="w-full h-full relative z-30" // higher z-index to float above
+                                                        }}
+                                                        className="w-full h-full relative z-30"
                                                     >
                                                         <Image
                                                             src={
