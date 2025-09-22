@@ -596,7 +596,7 @@ const ScrollPhoneAnimation = () => {
                         }}
                     >
                         <Image
-                            src="/pastry.svg"
+                            src="/Pastry.svg"
                             alt="Floating Pastry"
                             fill
                             className="drop-shadow-xl"
