@@ -765,7 +765,7 @@ const ScrollPhoneAnimation = () => {
                                 </div>
                                 <div className="absolute top-0 right-7 z-50">
                                     <Image
-                                        src="/pastry.svg"
+                                        src="/Pastry.svg"
                                         alt="Overlay Image"
                                         width={144}
                                         height={144}
