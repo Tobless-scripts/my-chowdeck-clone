@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     ChevronDownCircle,
     ShoppingCart,
@@ -22,10 +22,25 @@ import Link from "next/link";
 export default function Navbar() {
     const [openMenu, setOpenMenu] = useState(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
+
+    // ✅ Track scroll
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 50);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     return (
         <>
-            <nav className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 md:px-14 lg:px-24 py-12 lg:py-18 bg-transparent">
+            <nav
+                className={`fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 md:px-14 lg:px-24 
+                transition-all duration-300 ${
+                    isScrolled ? "py-6" : "py-12 lg:py-18 bg-transparent"
+                }`}
+            >
                 <div className="flex items-center gap-4">
                     {/* Logo */}
                     <div className="flex items-center justify-center bg-[#0c513f] text-white rounded-full px-2 lg:px-6 py-2 lg:py-2.5 font-semibold cursor-pointer">
