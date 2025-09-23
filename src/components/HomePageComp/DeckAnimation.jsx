@@ -205,7 +205,7 @@ const ScrollPhoneAnimation = () => {
         const hasAnimated = animatedItems.has(cardId);
 
         const isInView = useInView(ref, {
-            once: true, // Only trigger once
+            once: true, // only fires once
             amount: screenSize === "sm" ? 0.3 : 0.4,
             margin: "-50px 0px -50px 0px",
         });
@@ -217,24 +217,15 @@ const ScrollPhoneAnimation = () => {
             }
         }, [isInView, hasAnimated, cardId, screenSize]);
 
-        const shouldAnimate = hasAnimated || isInView;
+        // 👇 only animate if already flagged as animated
+        const shouldAnimate = hasAnimated;
 
         return (
             <motion.div
                 ref={ref}
-                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                initial={{ opacity: 0, y: 50 }}
                 animate={
-                    shouldAnimate
-                        ? {
-                              opacity: 1,
-                              y: 0,
-                              scale: 1,
-                          }
-                        : {
-                              opacity: 0,
-                              y: 50,
-                              scale: 0.9,
-                          }
+                    shouldAnimate ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
                 }
                 transition={{
                     duration: 0.6,
@@ -244,10 +235,10 @@ const ScrollPhoneAnimation = () => {
                     damping: 15,
                 }}
                 className={`
-                    ${screenSize === "sm" ? "mx-4 mb-8" : "mx-6 mb-12"}
-                    rounded-3xl overflow-hidden shadow-2xl border-4 border-black
-                    ${screenSize === "sm" ? "h-[500px]" : "h-[600px]"}
-                `}
+        ${screenSize === "sm" ? "mb-8 mx-6" : "mx-14 mb-12"}
+        rounded-3xl overflow-hidden shadow-2xl border-4 border-black
+        ${screenSize === "sm" ? "h-[500px]" : "h-[600px]"}
+      `}
                 style={{ backgroundColor: card.closedColor }}
             >
                 <div className="h-full flex flex-col">
@@ -262,15 +253,6 @@ const ScrollPhoneAnimation = () => {
                                 screenSize === "sm" ? "text-3xl" : "text-4xl"
                             }`}
                             style={{ color: card.closedColorText }}
-                            initial={{ scale: 1, rotate: 0 }}
-                            animate={
-                                shouldAnimate
-                                    ? {
-                                          scale: 1.05,
-                                          rotate: 1,
-                                      }
-                                    : { scale: 1, rotate: 0 }
-                            }
                             transition={{
                                 duration: 0.8,
                                 ease: "easeOut",
@@ -301,15 +283,6 @@ const ScrollPhoneAnimation = () => {
                     >
                         <motion.div
                             className="w-full h-full relative"
-                            initial={{ scale: 1, rotate: 0 }}
-                            animate={
-                                shouldAnimate
-                                    ? {
-                                          scale: 1.1,
-                                          rotate: 2,
-                                      }
-                                    : { scale: 1, rotate: 0 }
-                            }
                             transition={{
                                 duration: 0.8,
                                 ease: "easeOut",
@@ -324,16 +297,13 @@ const ScrollPhoneAnimation = () => {
                             />
                         </motion.div>
 
-                        {/* Floating elements for visual interest */}
+                        {/* Floating elements */}
                         <motion.div
                             className="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full"
                             initial={{ y: 0, opacity: 0.5 }}
                             animate={
                                 shouldAnimate
-                                    ? {
-                                          y: -20,
-                                          opacity: 1,
-                                      }
+                                    ? { y: -20, opacity: 1 }
                                     : { y: 0, opacity: 0.5 }
                             }
                             transition={{
@@ -347,11 +317,7 @@ const ScrollPhoneAnimation = () => {
                             initial={{ y: 0, x: 0, opacity: 0.3 }}
                             animate={
                                 shouldAnimate
-                                    ? {
-                                          y: 15,
-                                          x: 10,
-                                          opacity: 0.8,
-                                      }
+                                    ? { y: 15, x: 10, opacity: 0.8 }
                                     : { y: 0, x: 0, opacity: 0.3 }
                             }
                             transition={{
@@ -390,26 +356,6 @@ const ScrollPhoneAnimation = () => {
         return (
             <motion.div
                 ref={ref}
-                initial={{
-                    opacity: 0,
-                    x: index % 2 === 0 ? -100 : 100,
-                    rotateY: 15,
-                }}
-                animate={
-                    shouldAnimate
-                        ? {
-                              opacity: 1,
-                              x: 0,
-                              rotateY: 0,
-                              scale: 1,
-                          }
-                        : {
-                              opacity: 0,
-                              x: index % 2 === 0 ? -100 : 100,
-                              rotateY: 15,
-                              scale: 0.9,
-                          }
-                }
                 transition={{
                     duration: 0.8,
                     delay: index * 0.2,
@@ -425,15 +371,6 @@ const ScrollPhoneAnimation = () => {
                         <motion.h2
                             className="text-4xl font-bold mb-6 leading-tight"
                             style={{ color: card.closedColorText }}
-                            initial={{ scale: 1, rotateX: 0 }}
-                            animate={
-                                shouldAnimate
-                                    ? {
-                                          scale: 1.1,
-                                          rotateX: 5,
-                                      }
-                                    : { scale: 1, rotateX: 0 }
-                            }
                             transition={{
                                 duration: 0.8,
                                 ease: "easeOut",
@@ -444,12 +381,6 @@ const ScrollPhoneAnimation = () => {
                         </motion.h2>
                         <motion.p
                             className="text-gray-700 leading-relaxed text-lg"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={
-                                shouldAnimate
-                                    ? { opacity: 1, y: 0 }
-                                    : { opacity: 0, y: 20 }
-                            }
                             transition={{ delay: 0.4, duration: 0.6 }}
                         >
                             {card.openContent.description}
@@ -460,15 +391,6 @@ const ScrollPhoneAnimation = () => {
                     <div className="relative overflow-hidden">
                         <motion.div
                             className="w-full h-full relative"
-                            initial={{ scale: 1, rotateZ: 0 }}
-                            animate={
-                                shouldAnimate
-                                    ? {
-                                          scale: 1.15,
-                                          rotateZ: 3,
-                                      }
-                                    : { scale: 1, rotateZ: 0 }
-                            }
                             transition={{
                                 duration: 0.8,
                                 ease: "easeOut",
@@ -514,27 +436,13 @@ const ScrollPhoneAnimation = () => {
         return (
             <motion.div
                 ref={ref}
-                initial={{ opacity: 0, scale: 0.8, y: 100 }}
-                animate={
-                    shouldAnimate
-                        ? {
-                              opacity: 1,
-                              scale: 1,
-                              y: 0,
-                          }
-                        : {
-                              opacity: 0,
-                              scale: 0.8,
-                              y: 100,
-                          }
-                }
                 transition={{
                     duration: 0.8,
                     type: "spring",
                     stiffness: 100,
                     damping: 15,
                 }}
-                className="flex justify-center items-center py-12"
+                className="flex justify-center items-center mx-auto py-12"
             >
                 <div
                     className={`relative ${
@@ -546,16 +454,6 @@ const ScrollPhoneAnimation = () => {
                     {/* Phone with single floating animation */}
                     <motion.div
                         className="relative w-full h-full"
-                        initial={{ y: 0, rotateY: 0, rotateX: 0 }}
-                        animate={
-                            shouldAnimate
-                                ? {
-                                      y: -20,
-                                      rotateY: 5,
-                                      rotateX: 2,
-                                  }
-                                : { y: 0, rotateY: 0, rotateX: 0 }
-                        }
                         transition={{
                             duration: 1.2,
                             ease: "easeOut",

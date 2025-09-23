@@ -4,27 +4,25 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Responsive hook for device type
+// Hook: detect device type (safe for SSR)
 function useDeviceType() {
-    const [device, setDevice] = useState(() => {
-        if (typeof window === "undefined") return "desktop";
-        if (window.innerWidth <= 750) return "mobile";
-        if (window.innerWidth <= 1024) return "tablet";
-        return "desktop";
-    });
+    const [device, setDevice] = useState("desktop");
+
     useEffect(() => {
         function handleResize() {
             if (window.innerWidth <= 768) setDevice("mobile");
             else if (window.innerWidth <= 1024) setDevice("tablet");
             else setDevice("desktop");
         }
+        handleResize(); // run once on mount
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
     return device;
 }
 
-// Paths: desktop vs tablet vs mobile
+// Path generator (client-only)
 function getPaths(device) {
     const WIDTH = window.innerWidth;
     const PADDING = WIDTH * 0.025;
@@ -32,15 +30,12 @@ function getPaths(device) {
     if (device === "mobile") {
         const BASE_Y = window.innerHeight - 60;
         return [
-            // Rider 1: left-to-right
             `M ${PADDING} ${BASE_Y} Q ${WIDTH / 2} ${BASE_Y - 30} ${
                 WIDTH - PADDING
             } ${BASE_Y}`,
-            // Rider 2: right-to-left
             `M ${WIDTH - PADDING} ${BASE_Y} Q ${WIDTH / 2} ${
                 BASE_Y - 30
             } ${PADDING} ${BASE_Y}`,
-            // Rider 3: diagonal
             `M ${WIDTH - 2 * PADDING} ${BASE_Y} Q ${WIDTH * 0.75} ${
                 BASE_Y - 60
             } ${PADDING * 2} ${BASE_Y}`,
@@ -70,6 +65,7 @@ function getPaths(device) {
     }
 }
 
+// Helpers
 function getSVGPath(pathD) {
     const svgNS = "http://www.w3.org/2000/svg";
     const path = document.createElementNS(svgNS, "path");
@@ -81,25 +77,27 @@ function easeInOutQuad(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
 
-function Rider({ src, path, duration, progress, size = 64 }) {
-    let riderStyle = { display: "none" };
-    if (typeof window !== "undefined" && progress < 1) {
-        const pathElem = getSVGPath(path);
-        const length = pathElem.getTotalLength();
-        const easedProgress = easeInOutQuad(progress);
-        const point = pathElem.getPointAtLength(easedProgress * length);
-        riderStyle = {
-            position: "absolute",
-            left: point.x,
-            top: point.y,
-            width: size,
-            height: size,
-            zIndex: 10,
-            transform: "translate(-50%, -50%)",
-            pointerEvents: "none",
-            display: "block",
-        };
-    }
+// Rider component (only render client-side)
+function Rider({ src, path, progress, size = 64 }) {
+    if (!path) return null;
+
+    const pathElem = getSVGPath(path);
+    const length = pathElem.getTotalLength();
+    const easedProgress = easeInOutQuad(progress);
+    const point = pathElem.getPointAtLength(easedProgress * length);
+
+    const riderStyle = {
+        position: "absolute",
+        left: point.x,
+        top: point.y,
+        width: size,
+        height: size,
+        zIndex: 10,
+        transform: "translate(-50%, -50%)",
+        pointerEvents: "none",
+        display: "block",
+    };
+
     return (
         <Image
             src={src}
@@ -120,33 +118,31 @@ export default function Hero() {
         "Iriela nri?",
         "Kun ci abinci?",
     ];
-
     const device = useDeviceType();
 
-    // Dynamic paths based on screen size and device type
-    const [paths, setPaths] = useState(() =>
-        typeof window !== "undefined" ? getPaths(device) : []
-    );
+    const [mounted, setMounted] = useState(false);
+    const [paths, setPaths] = useState([]);
+    const [index, setIndex] = useState(0);
+    const [activeRider, setActiveRider] = useState(0);
+    const [progress, setProgress] = useState(0);
 
+    // Mark component as mounted (prevents hydration mismatch)
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // Update paths when mounted or device changes
+    useEffect(() => {
+        if (!mounted) return;
         function updatePaths() {
             setPaths(getPaths(device));
         }
         updatePaths();
         window.addEventListener("resize", updatePaths);
         return () => window.removeEventListener("resize", updatePaths);
-    }, [device]);
+    }, [device, mounted]);
 
-    const riders = [
-        { src: "/rider1.svg", path: paths[0], duration: 8 },
-        { src: "/rider2.svg", path: paths[1], duration: 8 },
-        { src: "/rider3.webp", path: paths[2], duration: 8 },
-    ];
-
-    const [index, setIndex] = useState(0);
-    const [activeRider, setActiveRider] = useState(0);
-    const [progress, setProgress] = useState(0);
-
+    // Text cycle
     useEffect(() => {
         const interval = setInterval(() => {
             setIndex((prev) => (prev + 1) % texts.length);
@@ -154,36 +150,60 @@ export default function Hero() {
         return () => clearInterval(interval);
     }, [texts.length]);
 
+    // Rider animation
     useEffect(() => {
-        setProgress(0); // Instantly reset progress so animation starts immediately
+        if (!mounted || paths.length === 0) return;
 
+        setProgress(0);
         let start = null;
         let animationFrame;
 
         function animate(ts) {
             if (!start) start = ts;
             const elapsed = ts - start;
-            let nextProgress = Math.min(
-                elapsed / (riders[activeRider].duration * 1000),
-                1
-            );
+            let nextProgress = Math.min(elapsed / 8000, 1); // duration 8s
             setProgress(nextProgress);
             if (nextProgress < 1) {
                 animationFrame = requestAnimationFrame(animate);
             } else {
                 setTimeout(() => {
                     setProgress(0);
-                    setActiveRider((prev) => (prev + 1) % riders.length);
+                    setActiveRider((prev) => (prev + 1) % 3);
                 }, 500);
             }
         }
 
         animationFrame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(animationFrame);
+    }, [activeRider, paths, mounted]);
 
-        return () => {
-            cancelAnimationFrame(animationFrame);
-        };
-    }, [activeRider, paths]);
+    if (!mounted) {
+        // Render only static background + text on server to avoid mismatch
+        return (
+            <section className="relative w-full h-screen md:h-[65vh] lg:h-screen overflow-hidden">
+                <div className="absolute inset-0 -z-10">
+                    <Image
+                        src="/chow1.svg"
+                        alt="Hero Background"
+                        fill
+                        priority
+                        className="object-cover"
+                    />
+                </div>
+                <div className="flex flex-col items-center justify-center h-full text-center text-black px-4">
+                    <h1 className="text-5xl md:text-8xl font-extrabold mb-6 tracking-tight">
+                        {texts[0]}
+                    </h1>
+                </div>
+            </section>
+        );
+    }
+
+    const riders = [
+        { src: "/rider1.svg", path: paths[0] },
+        { src: "/rider2.svg", path: paths[1] },
+        { src: "/rider3.webp", path: paths[2] },
+    ];
 
     return (
         <section className="relative w-full h-screen md:h-[65vh] lg:h-screen overflow-hidden">
@@ -218,10 +238,10 @@ export default function Hero() {
                         <Image
                             src="/PlayStore.svg"
                             alt="Google Play"
-                            priority
                             width={20}
                             height={20}
                             className="object-cover w-10 h-10"
+                            priority
                         />
                         <span className="text-lg font-bold">
                             Download on Google Play
@@ -231,10 +251,10 @@ export default function Hero() {
                         <Image
                             src="/AppleStore.svg"
                             alt="App Store"
-                            priority
                             width={20}
                             height={20}
                             className="object-cover w-10 h-10"
+                            priority
                         />
                         <span className="text-lg font-bold">
                             Download on App Store
@@ -243,39 +263,44 @@ export default function Hero() {
                 </div>
             </div>
 
-            {/* SVG road overlay for debugging (optional, remove for production) */}
+            {/* Debug road paths */}
             <svg
                 className="absolute w-full h-full pointer-events-none"
                 style={{ zIndex: 2 }}
             >
-                <path
-                    d={paths[0]}
-                    stroke="red"
-                    strokeDasharray="4"
-                    fill="none"
-                />
-                <path
-                    d={paths[1]}
-                    stroke="blue"
-                    strokeDasharray="4"
-                    fill="none"
-                />
-                <path
-                    d={paths[2]}
-                    stroke="green"
-                    strokeDasharray="4"
-                    fill="none"
-                />
+                {paths[0] && (
+                    <path
+                        d={paths[0]}
+                        stroke="red"
+                        strokeDasharray="4"
+                        fill="none"
+                    />
+                )}
+                {paths[1] && (
+                    <path
+                        d={paths[1]}
+                        stroke="blue"
+                        strokeDasharray="4"
+                        fill="none"
+                    />
+                )}
+                {paths[2] && (
+                    <path
+                        d={paths[2]}
+                        stroke="green"
+                        strokeDasharray="4"
+                        fill="none"
+                    />
+                )}
             </svg>
 
-            {/* Only the active rider animates */}
+            {/* Active rider */}
             {riders.map((r, i) =>
                 i === activeRider ? (
                     <Rider
                         key={i}
                         src={r.src}
                         path={r.path}
-                        duration={r.duration}
                         progress={progress}
                         size={
                             device === "mobile"

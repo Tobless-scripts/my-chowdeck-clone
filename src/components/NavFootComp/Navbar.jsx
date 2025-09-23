@@ -36,9 +36,9 @@ export default function Navbar() {
     return (
         <>
             <nav
-                className={`fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 md:px-14 lg:px-24 
+                className={`fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 md:px-14 lg:px-22 
                 transition-all duration-300 ${
-                    isScrolled ? "py-6" : "py-12 lg:py-18 bg-transparent"
+                    isScrolled ? "py-4" : "py-12 lg:py-18 bg-transparent"
                 }`}
             >
                 <div className="flex items-center gap-4">
@@ -204,7 +204,7 @@ export default function Navbar() {
 
                 <div className="flex gap-2">
                     {/* Cart */}
-                    <button className="rounded-full bg-white shadow p-2 lg:p-4 cursor-pointer">
+                    <button className="rounded-full bg-white shadow-md p-2 lg:p-4 cursor-pointer">
                         <ShoppingCart className="text-green-600" size={22} />
                     </button>
                     {/* Hamburger Icon */}
