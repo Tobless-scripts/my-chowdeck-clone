@@ -43,7 +43,7 @@ export default function Navbar() {
             >
                 <div className="flex items-center gap-4">
                     {/* Logo */}
-                    <div className="flex items-center justify-center bg-[#0c513f] text-white rounded-full px-2 lg:px-6 py-2 lg:py-2.5 font-semibold cursor-pointer">
+                    <div className="flex items-center justify-center bg-[#0c513f] text-white rounded-full px-2 lg:px-6 py-2 lg:py-2.5 font-semibold cursor-pointer shadow-lg shadow-white">
                         <span className="lg:mr-1 text-md lg:text-lg">🔑</span>{" "}
                         <p className="hidden lg:block">Chowdeck</p>
                     </div>
@@ -106,7 +106,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Center Menu */}
-                <div className="relative hidden lg:flex items-center bg-white rounded-full shadow px-8 ml-8 py-4 gap-8">
+                <div className="relative hidden xl:flex items-center bg-white rounded-full shadow px-8 ml-8 py-4 gap-8">
                     <Link
                         href="#"
                         className="text-black font-semibold cursor-pointer"
@@ -162,7 +162,7 @@ export default function Navbar() {
                 </div>
 
                 {/* More Dropdown */}
-                <div className="ml-26 hidden lg:flex items-center bg-white rounded-full shadow ">
+                <div className="ml-26 hidden xl:flex items-center bg-white rounded-full shadow ">
                     {/* Products Dropdown */}
                     <div
                         onMouseEnter={() => setOpenMenu("more")}
@@ -209,7 +209,7 @@ export default function Navbar() {
                     </button>
                     {/* Hamburger Icon */}
                     <div
-                        className="flex lg:hidden items-center justify-center cursor-pointer"
+                        className="flex xl:hidden items-center justify-center cursor-pointer"
                         onClick={() => setDrawerOpen(true)}
                     >
                         <div className="bg-[#155B4A] rounded-full w-10 h-10 flex items-center justify-center">

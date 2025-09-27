@@ -89,16 +89,18 @@ export default function FoodSlider() {
     const goToSlide = (i) => setIndex(i);
 
     return (
-        <div className="px-6 md:px-14 lg:px-22 bg-white">
+        <div className="bg-[#0c513f] px-6 md:px-14 lg:px-22 relative">
+            {/* The rounded div should "float" on top */}
             <div
-                className={`relative h-[75vh] lg:h-[100vh] rounded-xl flex items-center justify-center overflow-hidden ${slides[index].color} transition-colors duration-700`}
+                className={`relative h-[75vh] lg:h-[100vh] rounded-3xl mt-[-150px] flex items-center justify-center overflow-hidden z-10 ${slides[index].color} transition-colors duration-700`}
             >
                 {/* Title above image */}
-                <div className="absolute top-6 w-full text-center  my-6 md:my-12">
+                <div className="absolute top-6 w-full text-center my-6 md:my-12">
                     <h2 className="text-3xl md:text-7xl font-bold text-black drop-shadow-md">
                         {slides[index].title}
                     </h2>
                 </div>
+
                 {/* Main Image */}
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -134,7 +136,6 @@ export default function FoodSlider() {
                                         : slides[index].bg
                                 }`}
                             >
-                                {/* Icon / Text */}
                                 {typeof slide.icon === "string" ? (
                                     <span
                                         className={
@@ -169,7 +170,7 @@ export default function FoodSlider() {
                                             strokeWidth="3"
                                             fill="none"
                                             strokeDasharray="100, 100"
-                                            strokeDashoffset={100 - progress} // use 100 - progress for countdown effect
+                                            strokeDashoffset={100 - progress}
                                             d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32"
                                         />
                                     </svg>

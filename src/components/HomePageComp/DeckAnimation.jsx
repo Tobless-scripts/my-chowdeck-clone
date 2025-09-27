@@ -639,7 +639,7 @@ const ScrollPhoneAnimation = () => {
                         Try the everything app.
                     </p>
                 </div>
-                <div ref={containerRef} className="h-[5000vh] relative">
+                <div ref={containerRef} className="h-[4000vh] relative">
                     <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                         {/* Phone - starts centered, moves left */}
                         <motion.div

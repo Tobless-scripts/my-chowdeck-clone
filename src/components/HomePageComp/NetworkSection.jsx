@@ -34,7 +34,7 @@ export default function JoinNetwork() {
     ];
 
     return (
-        <section className="w-full bg-white py-12">
+        <section className="w-full bg-white py-12 pb-[45vh]">
             <h2 className="text-4xl md:text-7xl leading-tight font-extralight text-center text-[#d1d5db] mb-10">
                 Join our growing network ↓
             </h2>

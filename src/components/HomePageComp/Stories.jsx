@@ -37,7 +37,7 @@ const cardData = [
 
 export default function PromoCards() {
     return (
-        <div className="w-full py-12 px-6 md:px-14 lg:px-22 bg-white">
+        <div className="w-full py-12 px-6 md:px-14 lg:px-22 bg-white pb-[35vh]">
             <div className="flex items-center justify-start gap-2 mb-6">
                 <h1 className="text-3xl md:text-7xl text-black font-bold">
                     Stories
