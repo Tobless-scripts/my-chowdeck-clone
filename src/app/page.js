@@ -14,9 +14,11 @@ export default function Page() {
             <Hero />
             <ScrollPhoneAnimation />
             <JoinNetwork />
-            <ThemeSlider />
-            <ChowdeckBanner />
-            <InfiniteScrollCards />
+            <div className="bg-[#0c513f] ">
+                <ThemeSlider />
+                <ChowdeckBanner />
+                <InfiniteScrollCards />
+            </div>
             <PromoCards />
             <FAQComponent />
             <PromoSection />

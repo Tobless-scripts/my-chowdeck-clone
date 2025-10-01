@@ -1,3 +1,4 @@
+import ChowdeckFooter from "@/components/NavFootComp/Footer";
 import "./globals.css";
 import Navbar from "@/components/NavFootComp/Navbar";
 
@@ -7,6 +8,7 @@ export default function RootLayout({ children }) {
             <body>
                 <Navbar />
                 {children}
+                <ChowdeckFooter />
             </body>
         </html>
     );

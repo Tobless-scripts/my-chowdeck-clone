@@ -43,17 +43,22 @@ export default function Navbar() {
             >
                 <div className="flex items-center gap-4">
                     {/* Logo */}
-                    <div className="flex items-center justify-center bg-[#0c513f] text-white rounded-full px-2 lg:px-6 py-2 lg:py-2.5 font-semibold cursor-pointer shadow-lg shadow-white">
-                        <span className="lg:mr-1 text-md lg:text-lg">🔑</span>{" "}
-                        <p className="hidden lg:block">Chowdeck</p>
-                    </div>
+                    <Link href="/">
+                        <div className="flex items-center justify-center bg-[#0c513f] text-white rounded-full px-2 lg:px-6 py-2 lg:py-2.5 font-semibold cursor-pointer lg:shadow-lg shadow-gray-50">
+                            <span className="lg:mr-1 text-md lg:text-lg">
+                                🔑
+                            </span>{" "}
+                            <p className="hidden lg:block">Chowdeck</p>
+                        </div>
+                    </Link>
 
                     {/* Country Selector */}
                     <div
-                        className="relative"
+                        className="relative inline-block"
                         onMouseEnter={() => setOpenMenu("country")}
                         onMouseLeave={() => setOpenMenu(null)}
                     >
+                        {/* Button */}
                         <button className="flex items-center justify-center gap-1 rounded-full px-3 lg:px-6 py-3 lg:py-3.5 bg-white shadow cursor-pointer">
                             <Image
                                 src="/NigeriaFlag.svg"
@@ -71,15 +76,15 @@ export default function Navbar() {
                             />
                         </button>
 
-                        {/* Dropdown with fade only */}
+                        {/* Dropdown */}
                         <div
-                            className={`absolute top-full left-0 mt-2 w-40 rounded-lg py-2 space-y-2 transition-opacity duration-500 ${
+                            className={`absolute top-full left-0 w-40 rounded-lg py-2 space-y-2 transition-opacity duration-300 ${
                                 openMenu === "country"
                                     ? "opacity-100"
-                                    : "opacity-0 pointer-events-none"
+                                    : "opacity-0 invisible"
                             }`}
                         >
-                            <button className="flex items-left gap-1 rounded-full px-6 py-3.5 bg-white shadow cursor-pointer font-semibold border border-gray-100">
+                            <button className="flex items-center gap-1 rounded-full px-6 py-3.5 bg-white shadow cursor-pointer font-semibold border border-gray-100">
                                 <Image
                                     src="/GhanaFlag.svg"
                                     alt="Ghana Flag"
@@ -90,7 +95,8 @@ export default function Navbar() {
                                     Ghana
                                 </span>
                             </button>
-                            <button className="flex items-left gap-1 rounded-full px-6 py-3.5 bg-white shadow cursor-pointer font-semibold border border-gray-100">
+
+                            <button className="flex items-center gap-1 rounded-full px-6 py-3.5 bg-white shadow cursor-pointer font-semibold border border-gray-100">
                                 <Image
                                     src="/NigeriaFlag.svg"
                                     alt="Nigeria Flag"
@@ -109,31 +115,86 @@ export default function Navbar() {
                 <div className="relative hidden xl:flex items-center bg-white rounded-full shadow px-8 ml-8 py-4 gap-8">
                     <Link
                         href="#"
-                        className="text-black font-semibold cursor-pointer"
+                        className="relative text-black font-semibold cursor-pointer group"
                     >
                         Company
+                        <svg
+                            className="absolute left-0 -bottom-1 w-full h-2 text-yellow-400 hidden group-hover:block"
+                            viewBox="0 0 100 10"
+                            preserveAspectRatio="none"
+                        >
+                            <path
+                                d="M0,5 C20,0 40,10 60,5 80,0 100,10 120,5"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                fill="none"
+                            />
+                        </svg>
                     </Link>
+
+                    {/* Vendors */}
                     <Link
                         href="#"
-                        className="text-black font-semibold cursor-pointer"
+                        className="relative text-black font-semibold cursor-pointer group px-2"
                     >
                         Vendors
+                        {/* Top wave */}
+                        <svg
+                            className="absolute left-0 -top-2 w-full h-2 text-yellow-400 hidden group-hover:block"
+                            viewBox="0 0 100 10"
+                            preserveAspectRatio="none"
+                        >
+                            <path
+                                d="M0,5 C20,0 40,10 60,5 80,0 100,10 120,5"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                fill="none"
+                            />
+                        </svg>
+                        {/* Bottom wave */}
+                        <svg
+                            className="absolute left-0 -bottom-2 w-full h-2 text-yellow-400 hidden group-hover:block"
+                            viewBox="0 0 100 10"
+                            preserveAspectRatio="none"
+                        >
+                            <path
+                                d="M0,5 C20,0 40,10 60,5 80,0 100,10 120,5"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                fill="none"
+                            />
+                        </svg>
                     </Link>
+
+                    {/* Riders */}
                     <Link
                         href="#"
-                        className="text-black font-semibold cursor-pointer"
+                        className="relative text-black font-semibold cursor-pointer group px-3 py-1"
                     >
                         Riders
+                        <svg
+                            className="absolute inset-0 w-[140%] h-[200%] -left-[20%] -top-[50%] text-yellow-400 hidden group-hover:block"
+                            viewBox="0 0 200 100"
+                            preserveAspectRatio="none"
+                        >
+                            <path
+                                d="M20,50 Q40,5 70,25 T130,25 T180,25 Q200,5 190,50 Q200,95 160,75 T100,75 T40,75 Q0,95 20,50 Z"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                fill="none"
+                            />
+                        </svg>
                     </Link>
 
                     {/* Products Dropdown */}
                     <div
+                        className="relative inline-block"
                         onMouseEnter={() => setOpenMenu("products")}
                         onMouseLeave={() => setOpenMenu(null)}
-                        className="relative"
                     >
+                        {/* Button */}
                         <button className="flex items-center gap-1 text-black font-semibold cursor-pointer">
-                            Products{" "}
+                            Products
                             <ChevronDownCircle
                                 className={`transform transition-transform duration-500 ${
                                     openMenu === "products"
@@ -144,17 +205,18 @@ export default function Navbar() {
                             />
                         </button>
 
+                        {/* Dropdown */}
                         <div
-                            className={`absolute mt-4 rounded-lg py-2 space-y-2 transform origin-top transition-all duration-700 ${
+                            className={`absolute rounded-lg py-8 space-y-2 transform origin-top transition-all duration-300 ${
                                 openMenu === "products"
                                     ? "scale-y-100 opacity-100"
-                                    : "scale-y-0 opacity-0 pointer-events-none"
+                                    : "scale-y-0 opacity-0 invisible"
                             }`}
                         >
-                            <button className="flex items-center ml-auto gap-2 text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100">
+                            <button className="flex items-center ml-auto gap-2 text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100 hover:text-[#8c77ec] hover:border-1      hover:border-[#8c77ec] hover:scale-106">
                                 Chowpass
                             </button>
-                            <button className="flex items-center gap-2 ml-auto text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100">
+                            <button className="flex items-center ml-auto gap-2 text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100 hover:text-[#990038] hover:border-1 hover:border-[#990038] hover:scale-106">
                                 Relay
                             </button>
                         </div>
@@ -162,14 +224,15 @@ export default function Navbar() {
                 </div>
 
                 {/* More Dropdown */}
-                <div className="ml-26 hidden xl:flex items-center bg-white rounded-full shadow ">
-                    {/* Products Dropdown */}
+                <div className="ml-26 hidden xl:flex items-center bg-white rounded-full shadow relative">
                     <div
+                        className="relative inline-block"
                         onMouseEnter={() => setOpenMenu("more")}
                         onMouseLeave={() => setOpenMenu(null)}
                     >
+                        {/* Button */}
                         <button className="flex items-center gap-1 px-8 py-3.5 text-black font-semibold cursor-pointer">
-                            More{" "}
+                            More
                             <ChevronDownCircle
                                 className={`transform transition-transform duration-500 ${
                                     openMenu === "more"
@@ -180,24 +243,23 @@ export default function Navbar() {
                             />
                         </button>
 
+                        {/* Dropdown - removed pointer-events-none when closed */}
                         <div
-                            className={`absolute rounded-lg w-40 space-y-2 transform origin-top transition-all duration-700 ${
+                            className={`absolute left-0 w-40 rounded-lg py-4 space-y-2 transform origin-top transition-all duration-300 ${
                                 openMenu === "more"
                                     ? "scale-y-100 opacity-100"
-                                    : "scale-y-0 opacity-0 pointer-events-none"
+                                    : "scale-y-0 opacity-0 invisible"
                             }`}
                         >
-                            <div className="absolute mt-2 rounded-lg py-1 space-y-2">
-                                <button className="flex items-center ml-auto gap-2 text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100">
-                                    Contact Us
-                                </button>
-                                <button className="flex items-center gap-2 ml-auto text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100">
-                                    FAQs
-                                </button>
-                                <button className="flex items-center gap-2 ml-auto text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100">
-                                    Blog
-                                </button>
-                            </div>
+                            <button className="flex items-center gap-2 text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100 hover:border-1 hover:border-black hover:scale-106">
+                                Contact Us
+                            </button>
+                            <button className="flex items-center gap-2 text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100 hover:border-1 hover:border-black hover:scale-106">
+                                FAQs
+                            </button>
+                            <button className="flex items-center gap-2 text-black font-semibold cursor-pointer bg-white rounded-full shadow px-6 py-2.5 border border-gray-100 hover:border-1 hover:border-black hover:scale-106">
+                                Blog
+                            </button>
                         </div>
                     </div>
                 </div>

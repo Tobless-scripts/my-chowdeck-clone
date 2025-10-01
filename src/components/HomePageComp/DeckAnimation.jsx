@@ -26,6 +26,9 @@ const ScrollPhoneAnimation = () => {
         return () => window.removeEventListener("resize", checkScreenSize);
     }, []);
 
+    const headerRef = useRef(null);
+    const isInView = useInView(headerRef, { once: true, margin: "-50px" });
+
     // Large screen scroll animations (original complex animation)
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -205,7 +208,7 @@ const ScrollPhoneAnimation = () => {
         const hasAnimated = animatedItems.has(cardId);
 
         const isInView = useInView(ref, {
-            once: true, // only fires once
+            once: true,
             amount: screenSize === "sm" ? 0.3 : 0.4,
             margin: "-50px 0px -50px 0px",
         });
@@ -217,15 +220,12 @@ const ScrollPhoneAnimation = () => {
             }
         }, [isInView, hasAnimated, cardId, screenSize]);
 
-        // 👇 only animate if already flagged as animated
-        const shouldAnimate = hasAnimated;
-
         return (
             <motion.div
                 ref={ref}
                 initial={{ opacity: 0, y: 50 }}
                 animate={
-                    shouldAnimate ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+                    hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
                 }
                 transition={{
                     duration: 0.6,
@@ -267,7 +267,7 @@ const ScrollPhoneAnimation = () => {
                             }`}
                             initial={{ opacity: 0 }}
                             animate={
-                                shouldAnimate ? { opacity: 1 } : { opacity: 0 }
+                                hasAnimated ? { opacity: 1 } : { opacity: 0 }
                             }
                             transition={{ delay: 0.3, duration: 0.5 }}
                         >
@@ -300,9 +300,8 @@ const ScrollPhoneAnimation = () => {
                         {/* Floating elements */}
                         <motion.div
                             className="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full"
-                            initial={{ y: 0, opacity: 0.5 }}
                             animate={
-                                shouldAnimate
+                                hasAnimated
                                     ? { y: -20, opacity: 1 }
                                     : { y: 0, opacity: 0.5 }
                             }
@@ -314,9 +313,8 @@ const ScrollPhoneAnimation = () => {
                         />
                         <motion.div
                             className="absolute bottom-8 left-6 w-6 h-6 bg-white/30 rounded-full"
-                            initial={{ y: 0, x: 0, opacity: 0.3 }}
                             animate={
-                                shouldAnimate
+                                hasAnimated
                                     ? { y: 15, x: 10, opacity: 0.8 }
                                     : { y: 0, x: 0, opacity: 0.3 }
                             }
@@ -339,7 +337,7 @@ const ScrollPhoneAnimation = () => {
         const hasAnimated = animatedItems.has(cardId);
 
         const isInView = useInView(ref, {
-            once: true, // Only trigger once
+            once: true,
             amount: 0.4,
             margin: "-100px 0px -100px 0px",
         });
@@ -350,8 +348,6 @@ const ScrollPhoneAnimation = () => {
                 setAnimatedItems((prev) => new Set([...prev, cardId]));
             }
         }, [isInView, hasAnimated, cardId, screenSize]);
-
-        const shouldAnimate = hasAnimated || isInView;
 
         return (
             <motion.div
@@ -419,10 +415,7 @@ const ScrollPhoneAnimation = () => {
         const phoneId = "responsive-phone";
         const hasAnimated = animatedItems.has(phoneId);
 
-        const isInView = useInView(ref, {
-            once: true, // Only trigger once
-            amount: 0.3,
-        });
+        const isInView = useInView(ref, { once: true, margin: "-50px" });
 
         // Track when animation has been triggered
         useEffect(() => {
@@ -430,8 +423,6 @@ const ScrollPhoneAnimation = () => {
                 setAnimatedItems((prev) => new Set([...prev, phoneId]));
             }
         }, [isInView, hasAnimated, screenSize]);
-
-        const shouldAnimate = hasAnimated || isInView;
 
         return (
             <motion.div
@@ -476,9 +467,8 @@ const ScrollPhoneAnimation = () => {
                                 ? "top-4 right-2 w-[80px] h-[80px]"
                                 : "top-6 right-4 w-[100px] h-[100px]"
                         }`}
-                        initial={{ y: 0, x: 0, rotate: 0, scale: 1 }}
                         animate={
-                            shouldAnimate
+                            hasAnimated
                                 ? {
                                       y: -30,
                                       x: 15,
@@ -504,9 +494,8 @@ const ScrollPhoneAnimation = () => {
                     {/* Additional floating elements */}
                     <motion.div
                         className="absolute top-1/3 left-0 w-4 h-4 bg-orange-400 rounded-full opacity-70"
-                        initial={{ y: 0, opacity: 0.4, scale: 1 }}
                         animate={
-                            shouldAnimate
+                            hasAnimated
                                 ? {
                                       y: -40,
                                       opacity: 1,
@@ -522,9 +511,8 @@ const ScrollPhoneAnimation = () => {
                     />
                     <motion.div
                         className="absolute bottom-1/3 right-0 w-6 h-6 bg-green-400 rounded-full opacity-60"
-                        initial={{ y: 0, x: 0, opacity: 0.3 }}
                         animate={
-                            shouldAnimate
+                            hasAnimated
                                 ? {
                                       y: 35,
                                       x: -20,
@@ -566,9 +554,10 @@ const ScrollPhoneAnimation = () => {
                     {/* Header */}
                     <motion.div
                         className="flex flex-col gap-4 z-10 mb-12 px-4"
-                        initial={{ opacity: 0, y: -50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        ref={headerRef}
+                        initial={{ opacity: 0, y: 50 }}
+                        animate={isInView ? { opacity: 1, y: 0 } : {}}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
                     >
                         <h1
                             className={`font-extrabold text-center text-black ${
@@ -639,7 +628,7 @@ const ScrollPhoneAnimation = () => {
                         Try the everything app.
                     </p>
                 </div>
-                <div ref={containerRef} className="h-[4000vh] relative">
+                <div ref={containerRef} className="h-[3500vh] relative">
                     <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
                         {/* Phone - starts centered, moves left */}
                         <motion.div

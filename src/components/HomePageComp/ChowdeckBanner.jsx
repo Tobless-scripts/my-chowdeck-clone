@@ -4,8 +4,8 @@ import Image from "next/image";
 
 export default function ChowdeckBanner() {
     return (
-        <div className="w-full bg-[#0c513f] text-white overflow-hidden">
-            <div className="mx-auto px-6 md:px-14 lg:px-22 py-8 lg:py-16">
+        <div className="w-full text-white overflow-hidden">
+            <div className="mx-auto px-6 md:px-14 lg:px-22 pt-0 pb-8 lg:pb-16">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                     {/* Left Content */}
                     <div className="space-y-6">

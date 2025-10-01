@@ -1,42 +1,67 @@
 "use client";
 
 import React from "react";
-import { Apple, Sparkles, Heart, Zap, Bell } from "lucide-react";
+import {
+    Headphones,
+    Radio,
+    ShoppingBasket,
+    ShoppingCart,
+    Star,
+    UserPlus,
+    Utensils,
+} from "lucide-react";
 import Image from "next/image";
 
 const InfiniteScrollCards = () => {
     const cards = [
         {
-            icon: Apple,
+            icon: UserPlus,
+            text: "Quick and easy onboarding",
+            color: "fill-yellow-500",
+            theme: "text-yellow-500",
+        },
+        {
+            icon: Utensils,
             text: "Quality meal choices",
-            color: "bg-orange-500/20 border-orange-500/30",
+            color: "fill-orange-500",
+            theme: "text-orange-500",
         },
         {
-            icon: Sparkles,
+            icon: ShoppingBasket,
             text: "Fresh market picks",
-            color: "bg-emerald-500/20 border-emerald-500/30",
+            color: "fill-green-500",
+            theme: "text-green-500",
         },
         {
-            icon: Heart,
-            text: "Essential healthcare supplies",
-            color: "bg-pink-500/20 border-pink-500/30",
-        },
-        {
-            icon: Zap,
+            icon: ShoppingCart,
             text: "Quick-grab groceries",
-            color: "bg-amber-500/20 border-amber-500/30",
+            color: "fill-orange-900",
+            theme: "text-orange-900",
         },
         {
-            icon: Bell,
-            text: "Live updates",
-            color: "bg-purple-500/20 border-purple-500/30",
+            icon: Radio,
+            text: "Live updates on orders",
+            color: "fill-purple-500",
+            theme: "text-purple-500",
+        },
+        {
+            icon: Star,
+            text: "Highly rated riders",
+            color: "fill-green-500",
+            theme: "text-green-500",
+        },
+        {
+            icon: Headphones,
+            text: "24/7 support for customers and vendors",
+            color: "fill-pink-500",
+            theme: "text-pink-500",
         },
     ];
 
     const duplicatedCards = Array(50).fill(cards).flat();
 
     return (
-        <div className="bg-[#0c513f] py-12 flex items-center overflow-hidden">
+        <div className="py-12 flex items-center overflow-hidden">
             <div className="w-full">
                 <div className="flex animate-scroll">
                     {duplicatedCards.map((card, index) => {
@@ -45,19 +70,18 @@ const InfiniteScrollCards = () => {
                             <div
                                 key={index}
                                 className={`
-                                    flex-shrink-0 mx-4 px-6 py-4 rounded-2xl
+                                    flex-shrink-0 mx-4 px-6 py-3.5 rounded-lg
                                     backdrop-blur-md bg-white/10 border border-white/20
-                                    shadow-xl hover:shadow-2xl
-                                    transition-all duration-300 hover:scale-105
-                                    ${card.color}
+                                    transition-all duration-300
                                     min-w-max
                                 `}
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-full bg-white/20 backdrop-blur-sm">
-                                        <IconComponent className="w-5 h-5 text-white" />
-                                    </div>
-                                    <span className="text-white font-medium text-sm whitespace-nowrap">
+                                    <IconComponent
+                                        className={`w-7 h-7 ${card.theme} ${card.color}`}
+                                    />
+
+                                    <span className="text-white font-semibold text-md whitespace-nowrap">
                                         {card.text}
                                     </span>
                                 </div>
@@ -132,7 +156,7 @@ const InfiniteScrollImages = () => {
                             }`}
                         >
                             <div className="relative group">
-                                <div className="relative w-[55vw] h-[85vh] sm:w-[45vw] sm:h-[100vh] md:w-[30vw] md:h-[80vh] lg:w-[25vw] lg:h-[105vh] py-8">
+                                <div className="relative w-[55vw] h-[54vh] sm:w-[45vw] sm:h-[49vh] md:w-[30vw] md:h-[49vh] lg:w-[25vw] lg:h-[105vh] py-8">
                                     <Image
                                         src={image.src}
                                         alt={image.alt}

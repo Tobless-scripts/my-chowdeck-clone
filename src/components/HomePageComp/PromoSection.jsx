@@ -1,12 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { Percent } from "lucide-react";
 
 export default function PromoSection() {
     return (
-        <section className="w-full py-10 static">
-            <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-center px-6 md:px-14 lg:px-22 h-[60vh] md:h-[55vh] lg:h-[105vh] 2xl:h-[65vh] 3xl:h-[45vh]">
+        <section className="w-full py-10 static bg-black">
+            <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-center px-6 md:px-14 lg:px-22 h-[50vh] md:h-[35vh] lg:h-[105vh] 2xl:h-[65vh] 3xl:h-[45vh]">
                 {/* Left Section */}
                 <div className="bg-[#0c513f] rounded-xl p-8 flex flex-col relative h-full">
                     {/* Header Text */}
