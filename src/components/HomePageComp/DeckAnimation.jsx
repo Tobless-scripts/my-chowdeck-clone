@@ -204,41 +204,27 @@ const ScrollPhoneAnimation = () => {
     // Mobile Card Component for smaller screens
     const MobileCard = ({ card, index }) => {
         const ref = useRef(null);
-        const cardId = `${card.id}-${index}`;
-        const hasAnimated = animatedItems.has(cardId);
-
         const isInView = useInView(ref, {
             once: true,
             amount: screenSize === "sm" ? 0.3 : 0.4,
             margin: "-50px 0px -50px 0px",
         });
 
-        // Track when animation has been triggered
-        useEffect(() => {
-            if (isInView && !hasAnimated && screenSize !== "lg") {
-                setAnimatedItems((prev) => new Set([...prev, cardId]));
-            }
-        }, [isInView, hasAnimated, cardId, screenSize]);
-
         return (
             <motion.div
                 ref={ref}
                 initial={{ opacity: 0, y: 50 }}
-                animate={
-                    hasAnimated ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
-                }
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{
                     duration: 0.6,
                     delay: index * 0.1,
-                    type: "spring",
-                    stiffness: 100,
-                    damping: 15,
+                    ease: "easeOut",
                 }}
                 className={`
-        ${screenSize === "sm" ? "mb-8 mx-6" : "mx-14 mb-12"}
-        rounded-3xl overflow-hidden shadow-2xl border-4 border-black
-        ${screenSize === "sm" ? "h-[500px]" : "h-[600px]"}
-      `}
+                ${screenSize === "sm" ? "mb-8 mx-6" : "mx-14 mb-12"}
+                rounded-3xl overflow-hidden shadow-2xl border-4 border-black
+                ${screenSize === "sm" ? "h-[500px]" : "h-[600px]"}
+            `}
                 style={{ backgroundColor: card.closedColor }}
             >
                 <div className="h-full flex flex-col">
@@ -248,31 +234,21 @@ const ScrollPhoneAnimation = () => {
                             screenSize === "sm" ? "p-6 h-[40%]" : "p-8 h-[35%]"
                         } flex flex-col justify-center`}
                     >
-                        <motion.h2
+                        <h2
                             className={`font-bold mb-4 leading-tight ${
                                 screenSize === "sm" ? "text-3xl" : "text-4xl"
                             }`}
                             style={{ color: card.closedColorText }}
-                            transition={{
-                                duration: 0.8,
-                                ease: "easeOut",
-                                delay: 0.2,
-                            }}
                         >
                             {card.openContent.title}
-                        </motion.h2>
-                        <motion.p
+                        </h2>
+                        <p
                             className={`text-gray-700 leading-relaxed ${
                                 screenSize === "sm" ? "text-sm" : "text-base"
                             }`}
-                            initial={{ opacity: 0 }}
-                            animate={
-                                hasAnimated ? { opacity: 1 } : { opacity: 0 }
-                            }
-                            transition={{ delay: 0.3, duration: 0.5 }}
                         >
                             {card.openContent.description}
-                        </motion.p>
+                        </p>
                     </div>
 
                     {/* Image section */}
@@ -281,82 +257,38 @@ const ScrollPhoneAnimation = () => {
                             screenSize === "sm" ? "h-[60%]" : "h-[65%]"
                         } relative overflow-hidden`}
                     >
-                        <motion.div
-                            className="w-full h-full relative"
-                            transition={{
-                                duration: 0.8,
-                                ease: "easeOut",
-                                delay: 0.4,
-                            }}
-                        >
+                        <div className="w-full h-full relative">
                             <Image
                                 src={card.openContent.img}
                                 alt={card.openContent.title}
                                 fill
                                 className="object-contain p-4"
                             />
-                        </motion.div>
-
-                        {/* Floating elements */}
-                        <motion.div
-                            className="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full"
-                            animate={
-                                hasAnimated
-                                    ? { y: -20, opacity: 1 }
-                                    : { y: 0, opacity: 0.5 }
-                            }
-                            transition={{
-                                duration: 0.6,
-                                ease: "easeOut",
-                                delay: 0.5,
-                            }}
-                        />
-                        <motion.div
-                            className="absolute bottom-8 left-6 w-6 h-6 bg-white/30 rounded-full"
-                            animate={
-                                hasAnimated
-                                    ? { y: 15, x: 10, opacity: 0.8 }
-                                    : { y: 0, x: 0, opacity: 0.3 }
-                            }
-                            transition={{
-                                duration: 0.6,
-                                ease: "easeOut",
-                                delay: 0.7,
-                            }}
-                        />
+                        </div>
                     </div>
                 </div>
             </motion.div>
         );
     };
 
-    // Tablet Card Component
+    // Tablet Card Component, same logic as MobileCard but with different layout
     const TabletCard = ({ card, index }) => {
         const ref = useRef(null);
-        const cardId = `tablet-${card.id}-${index}`;
-        const hasAnimated = animatedItems.has(cardId);
-
         const isInView = useInView(ref, {
             once: true,
             amount: 0.4,
             margin: "-100px 0px -100px 0px",
         });
 
-        // Track when animation has been triggered
-        useEffect(() => {
-            if (isInView && !hasAnimated && screenSize === "md") {
-                setAnimatedItems((prev) => new Set([...prev, cardId]));
-            }
-        }, [isInView, hasAnimated, cardId, screenSize]);
-
         return (
             <motion.div
                 ref={ref}
+                initial={{ opacity: 0, y: 50 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{
-                    duration: 0.8,
-                    delay: index * 0.2,
-                    type: "spring",
-                    stiffness: 80,
+                    duration: 0.6,
+                    delay: index * 0.1,
+                    ease: "easeOut",
                 }}
                 className="mx-8 mb-16 rounded-3xl overflow-hidden shadow-2xl border-4 border-black"
                 style={{ backgroundColor: card.closedColor }}
@@ -364,45 +296,27 @@ const ScrollPhoneAnimation = () => {
                 <div className="grid grid-cols-2 h-[400px]">
                     {/* Content side */}
                     <div className="p-8 flex flex-col justify-center">
-                        <motion.h2
+                        <h2
                             className="text-4xl font-bold mb-6 leading-tight"
                             style={{ color: card.closedColorText }}
-                            transition={{
-                                duration: 0.8,
-                                ease: "easeOut",
-                                delay: 0.3,
-                            }}
                         >
                             {card.openContent.title}
-                        </motion.h2>
-                        <motion.p
-                            className="text-gray-700 leading-relaxed text-lg"
-                            transition={{ delay: 0.4, duration: 0.6 }}
-                        >
+                        </h2>
+                        <p className="text-gray-700 leading-relaxed text-lg">
                             {card.openContent.description}
-                        </motion.p>
+                        </p>
                     </div>
 
                     {/* Image side */}
                     <div className="relative overflow-hidden">
-                        <motion.div
-                            className="w-full h-full relative"
-                            transition={{
-                                duration: 0.8,
-                                ease: "easeOut",
-                                delay: 0.5,
-                            }}
-                        >
+                        <div className="w-full h-full relative">
                             <Image
                                 src={card.openContent.img}
                                 alt={card.openContent.title}
                                 fill
                                 className="object-contain p-6"
                             />
-                        </motion.div>
-
-                        {/* Background pattern */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-white/20 pointer-events-none" />
+                        </div>
                     </div>
                 </div>
             </motion.div>
